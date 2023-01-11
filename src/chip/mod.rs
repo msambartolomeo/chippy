@@ -30,7 +30,22 @@ const DEFAULT_SPRITES: [u8; 5 * 16] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
-struct Chip {
+// s or start - A 4-bit value, the first 4 bits of the instruction
+// nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
+// n or nibble - A 4-bit value, the lowest 4 bits of the instruction
+// x - A 4-bit value, the lower 4 bits of the high byte of the instruction
+// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
+// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+enum BitVariables {
+    S,
+    Nnn,
+    N,
+    X,
+    Y,
+    KK,
+}
+
+pub struct Chip {
     memory: [u8; MAX_MEMORY],
     v_registers: [u8; REGISTERS_COUNT],
     i_register: u16,
@@ -44,7 +59,7 @@ struct Chip {
 }
 
 impl Chip {
-    fn new() -> Chip {
+    pub fn new() -> Chip {
         let mut chip = Chip {
             memory: [0; MAX_MEMORY],
             v_registers: [0; REGISTERS_COUNT],
@@ -62,6 +77,35 @@ impl Chip {
             chip.memory[i] = *byte;
         }
 
+        chip.program_counter_register = 0x200;
+
         chip
+    }
+
+    // Returns the part of the u16 represented by the variable
+    fn resolve_pc_variable(&self, variable: BitVariables) -> u16 {
+        let pc = self.program_counter_register;
+        match variable {
+            BitVariables::S => pc >> 12,
+            BitVariables::Nnn => pc & 0x0FFF,
+            BitVariables::N => pc & 0x000F,
+            BitVariables::X => (pc & 0x0F00) >> 8,
+            BitVariables::Y => (pc & 0x00F0) >> 4,
+            BitVariables::KK => pc & 0x00FF,
+        }
+    }
+
+    fn process_instruction(&mut self) {
+        let nibbles = (
+            self.resolve_pc_variable(BitVariables::S),
+            self.resolve_pc_variable(BitVariables::X),
+            self.resolve_pc_variable(BitVariables::Y),
+            self.resolve_pc_variable(BitVariables::N),
+        );
+
+        match nibbles {
+            (0, 0, 0xE, 0) => self.display.clear(),
+            _ => todo!(),
+        }
     }
 }

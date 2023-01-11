@@ -1,5 +1,7 @@
 mod chip;
 
+use chip::Chip;
+
 fn main() {
-    println!("Hello, world!");
+    let chip: Chip = Chip::new();
 }
