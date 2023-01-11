@@ -6,12 +6,12 @@ use display::Display;
 use keyboard::Keyboard;
 use timer::{Delay, Sound};
 
-pub const MAX_MEMORY: usize = 4096;
-pub const ROM_START: u16 = 0x200;
-pub const REGISTERS_COUNT: usize = 16;
-pub const STACK_SIZE: usize = 16;
+const MAX_MEMORY: usize = 4096;
+const ROM_START: u16 = 0x200;
+const REGISTERS_COUNT: usize = 16;
+const STACK_SIZE: usize = 16;
 
-pub const DEFAULT_SPRITES: [u8; 5 * 16] = [
+const DEFAULT_SPRITES: [u8; 5 * 16] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
