@@ -10,23 +10,10 @@ use memory::Memory;
 use stack::Stack;
 use timer::{Delay, Sound};
 
+use self::memory::Instruction;
+
 const ROM_START: u16 = 0x200;
 const REGISTERS_COUNT: usize = 16;
-
-// s or start - A 4-bit value, the first 4 bits of the instruction
-// nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
-// n or nibble - A 4-bit value, the lowest 4 bits of the instruction
-// x - A 4-bit value, the lower 4 bits of the high byte of the instruction
-// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
-// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
-enum BitVariables {
-    S,
-    Nnn,
-    N,
-    X,
-    Y,
-    KK,
-}
 
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
@@ -55,26 +42,10 @@ impl Chip {
         }
     }
 
-    // Returns the part of the u16 represented by the variable
-    fn resolve_pc_variable(&self, variable: BitVariables) -> u16 {
-        let pc = self.program_counter_register;
-        match variable {
-            BitVariables::S => pc >> 12,
-            BitVariables::Nnn => pc & 0x0FFF,
-            BitVariables::N => pc & 0x000F,
-            BitVariables::X => (pc & 0x0F00) >> 8,
-            BitVariables::Y => (pc & 0x00F0) >> 4,
-            BitVariables::KK => pc & 0x00FF,
-        }
-    }
-
     fn process_instruction(&mut self) {
-        let nibbles: (u8, u8, u8, u8) = (
-            self.resolve_pc_variable(BitVariables::S) as u8,
-            self.resolve_pc_variable(BitVariables::X) as u8,
-            self.resolve_pc_variable(BitVariables::Y) as u8,
-            self.resolve_pc_variable(BitVariables::N) as u8,
-        );
+        let instruction = Instruction::from(self.program_counter_register);
+
+        let nibbles = instruction.get_nibbles();
 
         match nibbles {
             // 00E0 - CLS
