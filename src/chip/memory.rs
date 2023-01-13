@@ -71,7 +71,7 @@ pub struct Instruction {
     pub y: u8,
     pub n: u8,
     pub nnn: u16,
-    pub kk: u16,
+    pub kk: u8,
 }
 
 impl From<u16> for Instruction {
@@ -83,7 +83,7 @@ impl From<u16> for Instruction {
             y: get_variable(value, BitVariables::Y) as u8,
             n: get_variable(value, BitVariables::N) as u8,
             nnn: get_variable(value, BitVariables::Nnn),
-            kk: get_variable(value, BitVariables::Kk),
+            kk: get_variable(value, BitVariables::Kk) as u8,
         }
     }
 }
