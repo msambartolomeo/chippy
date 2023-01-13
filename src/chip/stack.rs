@@ -22,7 +22,7 @@ impl Stack {
     }
 
     pub fn pop(&mut self) -> u16 {
-        if self.stack_pointer <= 0 {
+        if self.stack_pointer == 0 {
             panic!("Stack is empty");
         }
 

@@ -53,7 +53,7 @@ impl From<u16> for Instruction {
 // x - A 4-bit value, the lower 4 bits of the high byte of the instruction
 // y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 // kk or byte - An 8-bit value, the lowest 8 bits of the instruction
-enum BitVariables {
+pub enum BitVariables {
     S,
     Nnn,
     N,
