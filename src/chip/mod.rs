@@ -6,11 +6,10 @@ mod timer;
 
 use display::Display;
 use keyboard::Keyboard;
+use memory::Instruction;
 use memory::Memory;
 use stack::Stack;
 use timer::{Delay, Sound};
-
-use self::memory::Instruction;
 
 const ROM_START: u16 = 0x200;
 const REGISTERS_COUNT: usize = 16;
@@ -18,7 +17,7 @@ const REGISTERS_COUNT: usize = 16;
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
     i_register: u16,
-    program_counter_register: u16,
+    pc_register: u16,
     memory: Memory,
     delay_timer: Delay,
     sound_timer: Sound,
@@ -32,7 +31,7 @@ impl Chip {
         Chip {
             v_registers: [0; REGISTERS_COUNT],
             i_register: 0,
-            program_counter_register: ROM_START,
+            pc_register: ROM_START,
             memory: Memory::new(),
             delay_timer: Delay::default(),
             sound_timer: Sound::default(),
@@ -43,7 +42,7 @@ impl Chip {
     }
 
     fn process_instruction(&mut self) {
-        let instruction = Instruction::from(self.program_counter_register);
+        let instruction = Instruction::from(self.pc_register);
 
         let nibbles = instruction.get_nibbles();
 
@@ -51,11 +50,11 @@ impl Chip {
             // 00E0 - CLS
             (0x0, 0x0, 0xE, 0x0) => self.display.clear(),
             // 00EE - RET
-            (0x0, 0x0, 0xE, 0xE) => todo!(),
+            (0x0, 0x0, 0xE, 0xE) => self.pc_register = self.stack.pop(),
             // 0nnn - SYS addr - Ignored
             (0x0, _, _, _) => (),
             // 1nnn - JP addr
-            (0x1, _, _, _) => todo!(),
+            (0x1, _, _, _) => self.pc_register = instruction.nnn,
             // 2nnn - CALL addr
             (0x2, _, _, _) => todo!(),
             // 3xkk - SE Vx, byte
