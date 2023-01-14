@@ -21,12 +21,14 @@ const DEFAULT_SPRITES: [u8; 5 * 16] = [
 
 pub struct Memory {
     array: [u8; MAX_MEMORY],
+    pub i_register: u16,
 }
 
 impl Memory {
     pub fn new() -> Memory {
         let mut memory = Memory {
             array: [0; MAX_MEMORY],
+            i_register: 0,
         };
 
         for (i, byte) in DEFAULT_SPRITES.iter().enumerate() {
@@ -34,6 +36,12 @@ impl Memory {
         }
 
         memory
+    }
+
+    pub fn get_bytes(&self, n: u8) -> &[u8] {
+        let n = n as usize;
+        let i = self.i_register as usize;
+        &self.array[i..i + n]
     }
 }
 

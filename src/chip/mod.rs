@@ -19,7 +19,6 @@ const REGISTERS_COUNT: usize = 16;
 
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
-    i_register: u16,
     pc_register: u16,
     memory: Memory,
     delay_timer: Delay,
@@ -33,7 +32,6 @@ impl Chip {
     pub fn new() -> Chip {
         Chip {
             v_registers: [0; REGISTERS_COUNT],
-            i_register: 0,
             pc_register: ROM_START,
             memory: Memory::new(),
             delay_timer: Delay::default(),
@@ -136,17 +134,25 @@ impl Chip {
                 self.v_registers[instruction.x] = v_x << 1;
             }
             // 9xy0 - SNE Vx, Vy
-            (0x9, _, _, 0x0) => todo!(),
+            (0x9, _, _, 0x0) => {
+                if v_x != v_y {
+                    self.increase_pc();
+                }
+            }
             // Annn - LD I, addr
-            (0xA, _, _, _) => todo!(),
+            (0xA, _, _, _) => self.memory.i_register = instruction.nnn,
             // Bnnn - JP V0, addr
-            (0xB, _, _, _) => todo!(),
+            (0xB, _, _, _) => self.pc_register = instruction.nnn + self.v_registers[0x0] as u16,
             // Cxkk - RND Vx, byte
             (0xC, _, _, _) => {
                 self.v_registers[instruction.x] = thread_rng().gen::<u8>() & instruction.kk
             }
             // Dxyn - DRW Vx, Vy, nibble
-            (0xD, _, _, _) => todo!(),
+            (0xD, _, _, _) => {
+                let sprite = self.memory.get_bytes(instruction.n);
+                let colision = self.display.draw_sprite(sprite, v_x, v_y);
+                self.set_flag(colision);
+            }
             // Ex9E - SKP Vx
             (0xE, _, 0x9, 0xE) => todo!(),
             // ExA1 - SKNP Vx
