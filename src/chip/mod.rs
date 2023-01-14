@@ -8,8 +8,11 @@ use display::Display;
 use keyboard::Keyboard;
 use memory::Instruction;
 use memory::Memory;
+use rand::Rng;
 use stack::Stack;
 use timer::{Delay, Sound};
+
+use rand::thread_rng;
 
 const ROM_START: u16 = 0x200;
 const REGISTERS_COUNT: usize = 16;
@@ -139,7 +142,9 @@ impl Chip {
             // Bnnn - JP V0, addr
             (0xB, _, _, _) => todo!(),
             // Cxkk - RND Vx, byte
-            (0xC, _, _, _) => todo!(),
+            (0xC, _, _, _) => {
+                self.v_registers[instruction.x] = thread_rng().gen::<u8>() & instruction.kk
+            }
             // Dxyn - DRW Vx, Vy, nibble
             (0xD, _, _, _) => todo!(),
             // Ex9E - SKP Vx
