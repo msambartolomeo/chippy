@@ -67,8 +67,8 @@ fn get_variable(value: u16, variable: BitVariables) -> u16 {
 pub struct Instruction {
     value: u16,
     pub s: u8,
-    pub x: u8,
-    pub y: u8,
+    pub x: usize,
+    pub y: usize,
     pub n: u8,
     pub nnn: u16,
     pub kk: u8,
@@ -79,8 +79,8 @@ impl From<u16> for Instruction {
         Instruction {
             value,
             s: get_variable(value, BitVariables::S) as u8,
-            x: get_variable(value, BitVariables::X) as u8,
-            y: get_variable(value, BitVariables::Y) as u8,
+            x: get_variable(value, BitVariables::X) as usize,
+            y: get_variable(value, BitVariables::Y) as usize,
             n: get_variable(value, BitVariables::N) as u8,
             nnn: get_variable(value, BitVariables::Nnn),
             kk: get_variable(value, BitVariables::Kk) as u8,
@@ -90,6 +90,6 @@ impl From<u16> for Instruction {
 
 impl Instruction {
     pub fn get_nibbles(&self) -> (u8, u8, u8, u8) {
-        (self.s, self.x, self.y, self.n)
+        (self.s, self.x as u8, self.y as u8, self.n)
     }
 }
