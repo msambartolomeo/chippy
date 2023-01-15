@@ -22,14 +22,15 @@ impl Display {
             panic!("Unsupported sprite");
         }
 
-        let x = (x % 64) as usize;
-        let y = (y % 64) as usize;
+        let x = x as usize;
+        let y = y as usize;
 
         let mut colision = false;
 
         for (height, byte) in sprite.iter().enumerate() {
             for bit in 0..8 {
-                let old_pixel = &mut self.screen[x + bit][y + height];
+                let old_pixel =
+                    &mut self.screen[(x + bit) % DISPLAY_WIDTH][(y + height) % DISPLAY_HEIGHT];
                 let new_pixel = byte & (1 << bit) != 0;
 
                 if !colision && *old_pixel && new_pixel {
