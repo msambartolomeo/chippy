@@ -170,7 +170,11 @@ impl Chip {
             // Fx07 - LD Vx, DT
             (0xF, _, 0x0, 0x7) => self.v_registers[instruction.x] = self.delay_timer.register,
             // Fx0A - LD Vx, K
-            (0xF, _, 0x0, 0xA) => todo!(),
+            (0xF, _, 0x0, 0xA) => {
+                if let Some(key) = self.keyboard.get_key() {
+                    self.v_registers[instruction.x] = key;
+                }
+            }
             // Fx15 - LD DT, Vx
             (0xF, _, 0x1, 0x5) => self.delay_timer.register = v_x,
             // Fx18 - LD ST, Vx
@@ -193,5 +197,9 @@ impl Chip {
             }
             _ => panic!("Unknown instruction"),
         };
+
+        if !self.keyboard.is_waiting() {
+            self.memory.increase_pc();
+        }
     }
 }
