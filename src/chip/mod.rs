@@ -13,6 +13,8 @@ use timer::{Delay, Sound};
 
 use rand::thread_rng;
 
+use self::timer::Timer;
+
 const REGISTERS_COUNT: usize = 16;
 
 pub struct Chip {
@@ -38,6 +40,13 @@ impl Chip {
         }
     }
 
+    pub fn run_cycle(&mut self) {
+        self.process_instruction();
+
+        self.delay_timer.countdown();
+        self.sound_timer.countdown();
+    }
+
     #[inline]
     fn set_flag(&mut self, condition: bool) {
         self.v_registers[0xF] = match condition {
@@ -46,7 +55,7 @@ impl Chip {
         };
     }
 
-    pub fn process_instruction(&mut self) {
+    fn process_instruction(&mut self) {
         let instruction = self.memory.get_current_instruction();
 
         let nibbles = instruction.get_nibbles();

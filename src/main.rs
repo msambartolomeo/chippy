@@ -5,5 +5,7 @@ use chip::Chip;
 fn main() {
     let mut chip: Chip = Chip::new();
 
-    chip.process_instruction();
+    loop {
+        chip.run_cycle();
+    }
 }
