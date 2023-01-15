@@ -1,9 +1,6 @@
-use core::num;
-
-use rand::seq::index;
-
 const MAX_MEMORY: usize = 4096;
 const DEFAULT_SPRITE_SIZE: usize = 5;
+const ROM_START: u16 = 0x200;
 
 const DEFAULT_SPRITES: [u8; DEFAULT_SPRITE_SIZE * 16] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -27,6 +24,7 @@ const DEFAULT_SPRITES: [u8; DEFAULT_SPRITE_SIZE * 16] = [
 pub struct Memory {
     array: [u8; MAX_MEMORY],
     pub i_register: u16,
+    pub pc_register: u16,
 }
 
 impl Memory {
@@ -34,6 +32,7 @@ impl Memory {
         let mut memory = Memory {
             array: [0; MAX_MEMORY],
             i_register: 0,
+            pc_register: ROM_START,
         };
 
         memory.array[0..DEFAULT_SPRITES.len()].copy_from_slice(&DEFAULT_SPRITES);
@@ -41,10 +40,24 @@ impl Memory {
         memory
     }
 
-    pub fn get_bytes(&self, n: u8) -> &[u8] {
-        let n = n as usize;
+    pub fn get_bytes(&self, count: u8) -> &[u8] {
+        let count = count as usize;
         let i = self.i_register as usize;
-        &self.array[i..i + n]
+        &self.array[i..i + count]
+    }
+
+    pub fn get_current_instruction(&self) -> Instruction {
+        let address = self.pc_register as usize;
+        let first = self.array[address] as u16;
+        let second = self.array[address + 1] as u16;
+
+        let raw_instruction = first << 8 | second;
+
+        Instruction::from(raw_instruction)
+    }
+
+    pub fn increase_pc(&mut self) {
+        self.pc_register += 2;
     }
 
     pub fn load_default_sprite(&mut self, x: u8) {
@@ -101,7 +114,6 @@ fn get_variable(value: u16, variable: BitVariables) -> u16 {
 }
 
 pub struct Instruction {
-    value: u16,
     pub s: u8,
     pub x: usize,
     pub y: usize,
@@ -113,7 +125,6 @@ pub struct Instruction {
 impl From<u16> for Instruction {
     fn from(value: u16) -> Self {
         Instruction {
-            value,
             s: get_variable(value, BitVariables::S) as u8,
             x: get_variable(value, BitVariables::X) as usize,
             y: get_variable(value, BitVariables::Y) as usize,

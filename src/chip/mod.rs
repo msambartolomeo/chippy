@@ -6,7 +6,6 @@ mod timer;
 
 use display::Display;
 use keyboard::Keyboard;
-use memory::Instruction;
 use memory::Memory;
 use rand::Rng;
 use stack::Stack;
@@ -14,12 +13,10 @@ use timer::{Delay, Sound};
 
 use rand::thread_rng;
 
-const ROM_START: u16 = 0x200;
 const REGISTERS_COUNT: usize = 16;
 
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
-    pc_register: u16,
     memory: Memory,
     delay_timer: Delay,
     sound_timer: Sound,
@@ -32,7 +29,6 @@ impl Chip {
     pub fn new() -> Chip {
         Chip {
             v_registers: [0; REGISTERS_COUNT],
-            pc_register: ROM_START,
             memory: Memory::new(),
             delay_timer: Delay::default(),
             sound_timer: Sound::default(),
@@ -40,11 +36,6 @@ impl Chip {
             keyboard: Keyboard::default(),
             display: Display::new(),
         }
-    }
-
-    #[inline]
-    fn increase_pc(&mut self) {
-        self.pc_register += 2;
     }
 
     #[inline]
@@ -56,7 +47,7 @@ impl Chip {
     }
 
     pub fn process_instruction(&mut self) {
-        let instruction = Instruction::from(self.pc_register);
+        let instruction = self.memory.get_current_instruction();
 
         let nibbles = instruction.get_nibbles();
 
@@ -67,32 +58,32 @@ impl Chip {
             // 00E0 - CLS
             (0x0, 0x0, 0xE, 0x0) => self.display.clear(),
             // 00EE - RET
-            (0x0, 0x0, 0xE, 0xE) => self.pc_register = self.stack.pop(),
+            (0x0, 0x0, 0xE, 0xE) => self.memory.pc_register = self.stack.pop(),
             // 0nnn - SYS addr - Ignored
             (0x0, _, _, _) => (),
             // 1nnn - JP addr
-            (0x1, _, _, _) => self.pc_register = instruction.nnn,
+            (0x1, _, _, _) => self.memory.pc_register = instruction.nnn,
             // 2nnn - CALL addr
             (0x2, _, _, _) => {
-                self.stack.push(self.pc_register);
-                self.pc_register = instruction.nnn;
+                self.stack.push(self.memory.pc_register);
+                self.memory.pc_register = instruction.nnn;
             }
             // 3xkk - SE Vx, byte
             (0x3, _, _, _) => {
                 if v_x == instruction.kk {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // 4xkk - SNE Vx, byte
             (0x4, _, _, _) => {
                 if v_x != instruction.kk {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // 5xy0 - SE Vx, Vy
             (0x5, _, _, 0x0) => {
                 if v_x == v_y {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // 6xkk - LD Vx, byte
@@ -136,13 +127,15 @@ impl Chip {
             // 9xy0 - SNE Vx, Vy
             (0x9, _, _, 0x0) => {
                 if v_x != v_y {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // Annn - LD I, addr
             (0xA, _, _, _) => self.memory.i_register = instruction.nnn,
             // Bnnn - JP V0, addr
-            (0xB, _, _, _) => self.pc_register = instruction.nnn + self.v_registers[0x0] as u16,
+            (0xB, _, _, _) => {
+                self.memory.pc_register = instruction.nnn + self.v_registers[0x0] as u16
+            }
             // Cxkk - RND Vx, byte
             (0xC, _, _, _) => {
                 self.v_registers[instruction.x] = thread_rng().gen::<u8>() & instruction.kk
@@ -156,13 +149,13 @@ impl Chip {
             // Ex9E - SKP Vx
             (0xE, _, 0x9, 0xE) => {
                 if self.keyboard.is_key_pressed(v_x) {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // ExA1 - SKNP Vx
             (0xE, _, 0xA, 0x1) => {
                 if !self.keyboard.is_key_pressed(v_x) {
-                    self.increase_pc();
+                    self.memory.increase_pc();
                 }
             }
             // Fx07 - LD Vx, DT
