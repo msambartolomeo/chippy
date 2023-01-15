@@ -1,6 +1,11 @@
-const MAX_MEMORY: usize = 4096;
+use core::num;
 
-const DEFAULT_SPRITES: [u8; 5 * 16] = [
+use rand::seq::index;
+
+const MAX_MEMORY: usize = 4096;
+const DEFAULT_SPRITE_SIZE: usize = 5;
+
+const DEFAULT_SPRITES: [u8; DEFAULT_SPRITE_SIZE * 16] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -31,9 +36,7 @@ impl Memory {
             i_register: 0,
         };
 
-        for (i, byte) in DEFAULT_SPRITES.iter().enumerate() {
-            memory.array[i] = *byte;
-        }
+        memory.array[0..DEFAULT_SPRITES.len()].copy_from_slice(&DEFAULT_SPRITES);
 
         memory
     }
@@ -42,6 +45,31 @@ impl Memory {
         let n = n as usize;
         let i = self.i_register as usize;
         &self.array[i..i + n]
+    }
+
+    pub fn load_default_sprite(&mut self, x: u8) {
+        if x > 0xF {
+            panic!("Invalid default sprite");
+        }
+
+        self.i_register = x as u16 * DEFAULT_SPRITE_SIZE as u16;
+    }
+
+    pub fn load_decimal_to_memory(&mut self, num: u8) {
+        let hundreds = num / 100;
+        let tens = num / 10 % 10;
+        let ones = num % 10;
+
+        let i = self.i_register as usize;
+
+        self.array[i] = hundreds;
+        self.array[i + 1] = tens;
+        self.array[i + 2] = ones;
+    }
+
+    pub fn load_bytes_to_memory(&mut self, bytes: &[u8]) {
+        let index = self.i_register as usize;
+        self.array[index..bytes.len()].copy_from_slice(bytes)
     }
 }
 

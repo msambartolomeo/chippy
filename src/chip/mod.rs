@@ -176,13 +176,19 @@ impl Chip {
             // Fx1E - ADD I, Vx
             (0xF, _, 0x1, 0xE) => self.memory.i_register += v_x as u16,
             // Fx29 - LD F, Vx
-            (0xF, _, 0x2, 0x9) => todo!(),
+            (0xF, _, 0x2, 0x9) => self.memory.load_default_sprite(v_x),
             // Fx33 - LD B, Vx
-            (0xF, _, 0x3, 0x3) => todo!(),
+            (0xF, _, 0x3, 0x3) => self.memory.load_decimal_to_memory(v_x),
             // Fx55 - LD [I], Vx
-            (0xF, _, 0x5, 0x5) => todo!(),
+            (0xF, _, 0x5, 0x5) => {
+                let bytes = &self.v_registers[0..instruction.x];
+                self.memory.load_bytes_to_memory(bytes);
+            }
             // Fx65 - LD Vx, [I]
-            (0xF, _, 0x6, 0x5) => todo!(),
+            (0xF, _, 0x6, 0x5) => {
+                let bytes = self.memory.get_bytes(instruction.x as u8);
+                self.v_registers[0..instruction.x].copy_from_slice(bytes);
+            }
             _ => panic!("Unknown instruction"),
         };
     }
