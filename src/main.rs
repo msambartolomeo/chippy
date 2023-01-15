@@ -3,5 +3,7 @@ mod chip;
 use chip::Chip;
 
 fn main() {
-    let chip: Chip = Chip::new();
+    let mut chip: Chip = Chip::new();
+
+    chip.process_instruction();
 }

@@ -55,7 +55,7 @@ impl Chip {
         };
     }
 
-    fn process_instruction(&mut self) {
+    pub fn process_instruction(&mut self) {
         let instruction = Instruction::from(self.pc_register);
 
         let nibbles = instruction.get_nibbles();
@@ -154,19 +154,27 @@ impl Chip {
                 self.set_flag(colision);
             }
             // Ex9E - SKP Vx
-            (0xE, _, 0x9, 0xE) => todo!(),
+            (0xE, _, 0x9, 0xE) => {
+                if self.keyboard.is_key_pressed(v_x) {
+                    self.increase_pc();
+                }
+            }
             // ExA1 - SKNP Vx
-            (0xE, _, 0xA, 0x1) => todo!(),
+            (0xE, _, 0xA, 0x1) => {
+                if !self.keyboard.is_key_pressed(v_x) {
+                    self.increase_pc();
+                }
+            }
             // Fx07 - LD Vx, DT
-            (0xF, _, 0x0, 0x7) => todo!(),
+            (0xF, _, 0x0, 0x7) => self.v_registers[instruction.x] = self.delay_timer.register,
             // Fx0A - LD Vx, K
             (0xF, _, 0x0, 0xA) => todo!(),
             // Fx15 - LD DT, Vx
-            (0xF, _, 0x1, 0x5) => todo!(),
+            (0xF, _, 0x1, 0x5) => self.delay_timer.register = v_x,
             // Fx18 - LD ST, Vx
-            (0xF, _, 0x1, 0x8) => todo!(),
+            (0xF, _, 0x1, 0x8) => self.sound_timer.register = v_x,
             // Fx1E - ADD I, Vx
-            (0xF, _, 0x1, 0xE) => todo!(),
+            (0xF, _, 0x1, 0xE) => self.memory.i_register += v_x as u16,
             // Fx29 - LD F, Vx
             (0xF, _, 0x2, 0x9) => todo!(),
             // Fx33 - LD B, Vx

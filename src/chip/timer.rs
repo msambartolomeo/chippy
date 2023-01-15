@@ -1,16 +1,15 @@
 pub trait Timer {
     fn countdown(&mut self);
-    fn set_timer(&mut self, time: u8);
 }
 
 #[derive(Default)]
 pub struct Sound {
-    register: u8,
+    pub register: u8,
 }
 
 #[derive(Default)]
 pub struct Delay {
-    register: u8,
+    pub register: u8,
 }
 
 impl Timer for Sound {
@@ -21,10 +20,6 @@ impl Timer for Sound {
             println!("Beep");
         }
     }
-
-    fn set_timer(&mut self, time: u8) {
-        self.register = time;
-    }
 }
 
 impl Timer for Delay {
@@ -32,9 +27,5 @@ impl Timer for Delay {
         if self.register > 0 {
             self.register -= 1;
         }
-    }
-
-    fn set_timer(&mut self, time: u8) {
-        self.register = time;
     }
 }

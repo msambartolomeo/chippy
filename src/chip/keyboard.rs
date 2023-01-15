@@ -30,4 +30,8 @@ impl Keyboard {
     pub fn unpress_key(&mut self, key: Key) {
         self.keys[key as usize] = false;
     }
+
+    pub fn is_key_pressed(&self, key: u8) -> bool {
+        self.keys[key as usize]
+    }
 }
