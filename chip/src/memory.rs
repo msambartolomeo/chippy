@@ -1,6 +1,5 @@
 const MAX_MEMORY: usize = 4096;
 const DEFAULT_SPRITE_SIZE: usize = 5;
-const ROM_START: u16 = 0x200;
 
 const DEFAULT_SPRITES: [u8; DEFAULT_SPRITE_SIZE * 16] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -28,11 +27,11 @@ pub struct Memory {
 }
 
 impl Memory {
-    pub fn new() -> Memory {
+    pub fn new(start: u16) -> Memory {
         let mut memory = Memory {
             array: [0; MAX_MEMORY],
             i_register: 0,
-            pc_register: ROM_START,
+            pc_register: start,
         };
 
         memory.array[0..DEFAULT_SPRITES.len()].copy_from_slice(&DEFAULT_SPRITES);

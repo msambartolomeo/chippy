@@ -1,18 +1,12 @@
 const STACK_SIZE: usize = 16;
 
+#[derive(Default)]
 pub struct Stack {
     array: [u16; STACK_SIZE],
     stack_pointer: usize,
 }
 
 impl Stack {
-    pub fn new() -> Stack {
-        Stack {
-            array: [0; STACK_SIZE],
-            stack_pointer: 0,
-        }
-    }
-
     pub fn push(&mut self, value: u16) {
         if self.stack_pointer >= STACK_SIZE {
             panic!("Stack is full");

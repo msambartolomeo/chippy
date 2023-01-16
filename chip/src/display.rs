@@ -5,13 +5,15 @@ pub struct Display {
     screen: [[bool; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
 }
 
-impl Display {
-    pub fn new() -> Display {
+impl Default for Display {
+    fn default() -> Self {
         Display {
             screen: [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
         }
     }
+}
 
+impl Display {
     pub fn clear(&mut self) {
         self.screen = [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT];
     }

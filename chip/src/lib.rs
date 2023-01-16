@@ -16,6 +16,7 @@ use rand::thread_rng;
 use self::timer::Timer;
 
 const REGISTERS_COUNT: usize = 16;
+const DEFAULT_ROM_START: u16 = 0x200;
 
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
@@ -27,16 +28,22 @@ pub struct Chip {
     display: Display,
 }
 
+impl Default for Chip {
+    fn default() -> Self {
+        Chip::new(DEFAULT_ROM_START)
+    }
+}
+
 impl Chip {
-    pub fn new() -> Chip {
+    pub fn new(rom_start: u16) -> Chip {
         Chip {
             v_registers: [0; REGISTERS_COUNT],
-            memory: Memory::new(),
+            memory: Memory::new(rom_start),
             delay_timer: Delay::default(),
             sound_timer: Sound::default(),
-            stack: Stack::new(),
+            stack: Stack::default(),
             keyboard: Keyboard::default(),
-            display: Display::new(),
+            display: Display::default(),
         }
     }
 
