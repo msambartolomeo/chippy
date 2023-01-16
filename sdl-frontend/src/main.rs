@@ -1,5 +1,3 @@
-mod chip;
-
 use chip::Chip;
 
 fn main() {
