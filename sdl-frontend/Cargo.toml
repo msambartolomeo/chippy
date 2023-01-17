@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 chip = { path = "../chip" }
+clap = { version = "4.1.1", features = ["derive"] }
 sdl2 = "0.35.2"
