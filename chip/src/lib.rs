@@ -12,7 +12,6 @@ use stack::Stack;
 use timer::{Delay, Sound, Timer};
 
 use rand::thread_rng;
-use std::fs::{self, File};
 
 pub use display::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
@@ -56,7 +55,7 @@ impl Chip {
     }
 
     pub fn load_rom(&mut self, path: String) -> Result<(), std::io::Error> {
-        let rom = fs::read(path)?;
+        let rom = std::fs::read(path)?;
 
         self.memory.load_rom(rom);
 
