@@ -21,9 +21,8 @@ impl Stack {
         }
 
         self.stack_pointer -= 1;
-        let value = self.array[self.stack_pointer];
 
-        value
+        self.array[self.stack_pointer]
     }
 }
 
