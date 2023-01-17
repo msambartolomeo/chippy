@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 chip = { path = "../chip" }
+sdl2 = "0.35.2"
