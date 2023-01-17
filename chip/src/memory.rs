@@ -72,16 +72,12 @@ impl Memory {
         let tens = num / 10 % 10;
         let ones = num % 10;
 
-        let i = self.i_register as usize;
-
-        self.array[i] = hundreds;
-        self.array[i + 1] = tens;
-        self.array[i + 2] = ones;
+        self.load_bytes_to_memory(&[hundreds, tens, ones]);
     }
 
     pub fn load_bytes_to_memory(&mut self, bytes: &[u8]) {
         let index = self.i_register as usize;
-        self.array[index..bytes.len()].copy_from_slice(bytes)
+        self.array[index..index + bytes.len()].copy_from_slice(bytes)
     }
 }
 
@@ -112,6 +108,7 @@ fn get_variable(value: u16, variable: BitVariables) -> u16 {
     }
 }
 
+#[cfg_attr(test, derive(PartialEq, Eq, Debug))]
 pub struct Instruction {
     pub s: u8,
     pub x: usize,
@@ -137,5 +134,103 @@ impl From<u16> for Instruction {
 impl Instruction {
     pub fn get_nibbles(&self) -> (u8, u8, u8, u8) {
         (self.s, self.x as u8, self.y as u8, self.n)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const DEFAULT_START: u16 = 0x200;
+
+    #[test]
+    fn test_instruction() {
+        let instruction = Instruction::from(0x1234);
+
+        assert_eq!(instruction.s, 1);
+        assert_eq!(instruction.x, 2);
+        assert_eq!(instruction.y, 3);
+        assert_eq!(instruction.n, 4);
+        assert_eq!(instruction.kk, 0x34);
+        assert_eq!(instruction.nnn, 0x234);
+    }
+
+    #[test]
+    fn test_nibbles() {
+        let instruction = Instruction::from(0x1234);
+
+        assert_eq!((1, 2, 3, 4), instruction.get_nibbles());
+    }
+
+    #[test]
+    fn test_new_memory() {
+        let memory = Memory::new(DEFAULT_START);
+
+        assert_eq!(memory.array[0..DEFAULT_SPRITES.len()], DEFAULT_SPRITES);
+    }
+
+    #[test]
+    fn test_load_default_sprite() {
+        let mut memory = Memory::new(DEFAULT_START);
+
+        memory.load_default_sprite(0xF);
+
+        let i = memory.i_register as usize;
+        assert_eq!(
+            memory.array[i..i + DEFAULT_SPRITE_SIZE],
+            DEFAULT_SPRITES[75..80]
+        )
+    }
+
+    #[test]
+    fn test_load_decimal() {
+        let mut memory = Memory::new(DEFAULT_START);
+        memory.i_register = DEFAULT_START;
+
+        memory.load_decimal_to_memory(123);
+
+        let i = memory.i_register as usize;
+        assert_eq!(memory.array[i..i + 3], [1, 2, 3]);
+    }
+
+    #[test]
+    fn test_get_bytes() {
+        let mut memory = Memory::new(DEFAULT_START);
+        memory.i_register = 0;
+        let bytes = memory.get_bytes(10);
+
+        assert_eq!(&DEFAULT_SPRITES[0..10], bytes);
+    }
+
+    #[test]
+    fn test_load_bytes() {
+        let mut memory = Memory::new(DEFAULT_START);
+        memory.i_register = DEFAULT_START;
+        const DATA: [u8; 3] = [1, 2, 3];
+
+        memory.load_bytes_to_memory(&DATA);
+
+        let i = memory.i_register as usize;
+        assert_eq!(memory.array[i..i + DATA.len()], DATA);
+    }
+
+    #[test]
+    fn test_increase_pc() {
+        let mut memory = Memory::new(DEFAULT_START);
+
+        memory.increase_pc();
+
+        assert_eq!(memory.pc_register, DEFAULT_START + 2);
+    }
+
+    #[test]
+    fn test_get_instruction() {
+        let mut memory = Memory::new(DEFAULT_START);
+        let pc = memory.pc_register as usize;
+        memory.array[pc] = 0x12;
+        memory.array[pc + 1] = 0x34;
+
+        let instruction = memory.get_current_instruction();
+
+        assert_eq!(instruction, Instruction::from(0x1234));
     }
 }
