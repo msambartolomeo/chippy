@@ -9,11 +9,12 @@ use keyboard::Keyboard;
 use memory::Memory;
 use rand::Rng;
 use stack::Stack;
-use timer::{Delay, Sound};
+use timer::{Delay, Sound, Timer};
 
 use rand::thread_rng;
+use std::fs::{self, File};
 
-use self::timer::Timer;
+pub use display::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 const REGISTERS_COUNT: usize = 16;
 const DEFAULT_ROM_START: u16 = 0x200;
@@ -52,6 +53,14 @@ impl Chip {
 
         self.delay_timer.countdown();
         self.sound_timer.countdown();
+    }
+
+    pub fn load_rom(&mut self, path: String) -> Result<(), std::io::Error> {
+        let rom = fs::read(path)?;
+
+        self.memory.load_rom(rom);
+
+        Ok(())
     }
 
     #[inline]

@@ -39,6 +39,16 @@ impl Memory {
         memory
     }
 
+    pub fn load_rom(&mut self, rom: Vec<u8>) {
+        if rom.len() > MAX_MEMORY - self.pc_register as usize {
+            panic!("Rom too big");
+        }
+
+        let i = self.pc_register as usize;
+
+        self.array[i..i + rom.len()].copy_from_slice(&rom);
+    }
+
     pub fn get_bytes(&self, count: u8) -> &[u8] {
         let count = count as usize;
         let i = self.i_register as usize;
