@@ -58,3 +58,44 @@ impl Keyboard {
         self.waiting_input
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const KEY: u8 = 0xF;
+
+    #[test]
+    fn test_get_key_not_waiting() {
+        let mut keyboard = Keyboard::default();
+
+        let key = keyboard.get_key();
+
+        assert_eq!(key, None);
+        assert_eq!(keyboard.waiting_input, true);
+    }
+
+    #[test]
+    fn test_get_key_not_pressed() {
+        let mut keyboard = Keyboard::default();
+        keyboard.waiting_input = true;
+
+        let key = keyboard.get_key();
+
+        assert_eq!(key, None);
+        assert_eq!(keyboard.waiting_input, true);
+    }
+
+    #[test]
+    fn test_get_key_pressed() {
+        let mut keyboard = Keyboard::default();
+        keyboard.waiting_input = true;
+        keyboard.last_pressed = Some(KEY);
+
+        let key = keyboard.get_key();
+
+        assert_eq!(key, Some(KEY));
+        assert_eq!(keyboard.waiting_input, false);
+        assert_eq!(keyboard.last_pressed, None);
+    }
+}
