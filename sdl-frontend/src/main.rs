@@ -25,7 +25,18 @@ fn main() {
         .build()
         .expect("Window building error");
 
-    loop {
+    let mut events = sdl.event_pump().expect("event pump creation error");
+
+    'main: loop {
+        for event in events.poll_iter() {
+            match event {
+                sdl2::event::Event::Quit { .. } => break 'main,
+                _ => {}
+            }
+        }
+
         chip.run_cycle();
     }
+
+    println!();
 }
