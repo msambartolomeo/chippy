@@ -47,6 +47,14 @@ impl Chip {
         }
     }
 
+    pub fn must_redraw(&mut self) -> bool {
+        self.display.must_redraw()
+    }
+
+    pub fn must_beep(&mut self) -> bool {
+        self.sound_timer.must_beep()
+    }
+
     pub fn run_cycle(&mut self) {
         self.process_instruction();
 
