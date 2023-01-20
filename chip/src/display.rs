@@ -3,22 +3,22 @@ pub const DISPLAY_HEIGHT: usize = 32;
 
 pub struct Display {
     screen: [[bool; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
-    must_redraw: bool,
+    must_draw: bool,
 }
 
 impl Default for Display {
     fn default() -> Self {
         Display {
             screen: [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
-            must_redraw: true,
+            must_draw: true,
         }
     }
 }
 
 impl Display {
-    pub fn must_redraw(&mut self) -> bool {
-        if self.must_redraw {
-            self.must_redraw = false;
+    pub fn must_draw(&mut self) -> bool {
+        if self.must_draw {
+            self.must_draw = false;
             return true;
         }
 
@@ -27,7 +27,7 @@ impl Display {
 
     pub fn clear(&mut self) {
         self.screen = [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT];
-        self.must_redraw = true;
+        self.must_draw = true;
     }
 
     // NOTE: Returns true on colision
@@ -55,7 +55,7 @@ impl Display {
             }
         }
 
-        self.must_redraw = true;
+        self.must_draw = true;
 
         colision
     }
@@ -69,7 +69,7 @@ mod tests {
     fn test_display_empty() {
         let mut display = Display {
             screen: [[true; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
-            must_redraw: true,
+            must_draw: true,
         };
 
         display.clear();

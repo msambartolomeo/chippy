@@ -1,4 +1,20 @@
 #[derive(Default)]
+pub struct Timer {
+    pub register: u8,
+}
+
+impl Timer {
+    pub fn countdown(&mut self) -> bool {
+        if self.register > 0 {
+            self.register -= 1;
+            return true;
+        }
+
+        false
+    }
+}
+
+#[derive(Default)]
 pub struct Keyboard {
     keys: [bool; 16],
     waiting_input: bool,

@@ -1,15 +1,14 @@
 mod display;
-mod keyboard;
+mod hardware;
 mod memory;
 mod stack;
 mod timer;
 
 use display::Display;
-use keyboard::Keyboard;
+use hardware::{Keyboard, Timer};
 use memory::Memory;
 use rand::Rng;
 use stack::Stack;
-use timer::{Delay, Sound, Timer};
 
 use rand::thread_rng;
 
@@ -21,11 +20,16 @@ const DEFAULT_ROM_START: u16 = 0x200;
 pub struct Chip {
     v_registers: [u8; REGISTERS_COUNT],
     memory: Memory,
-    delay_timer: Delay,
-    sound_timer: Sound,
+    delay_timer: Timer,
+    sound_timer: Timer,
     stack: Stack,
     keyboard: Keyboard,
     display: Display,
+}
+
+pub struct Actions {
+    pub draw: bool,
+    pub beep: bool,
 }
 
 impl Default for Chip {
@@ -39,27 +43,22 @@ impl Chip {
         Chip {
             v_registers: [0; REGISTERS_COUNT],
             memory: Memory::new(rom_start),
-            delay_timer: Delay::default(),
-            sound_timer: Sound::default(),
+            delay_timer: Timer::default(),
+            sound_timer: Timer::default(),
             stack: Stack::default(),
             keyboard: Keyboard::default(),
             display: Display::default(),
         }
     }
 
-    pub fn must_redraw(&mut self) -> bool {
-        self.display.must_redraw()
-    }
-
-    pub fn must_beep(&mut self) -> bool {
-        self.sound_timer.must_beep()
-    }
-
-    pub fn run_cycle(&mut self) {
+    pub fn run_cycle(&mut self) -> Actions {
         self.process_instruction();
 
         self.delay_timer.countdown();
-        self.sound_timer.countdown();
+        let beep = self.sound_timer.countdown();
+        let draw = self.display.must_draw();
+
+        Actions { draw, beep }
     }
 
     pub fn load_rom(&mut self, path: String) -> Result<(), std::io::Error> {
