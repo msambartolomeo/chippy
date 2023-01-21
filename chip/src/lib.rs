@@ -12,7 +12,7 @@ use stack::Stack;
 
 use rand::thread_rng;
 
-pub use display::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
+pub use display::{Screen, DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 const REGISTERS_COUNT: usize = 16;
 const DEFAULT_ROM_START: u16 = 0x200;
@@ -67,6 +67,10 @@ impl Chip {
         self.memory.load_rom(rom);
 
         Ok(())
+    }
+
+    pub fn screen(&self) -> &Screen {
+        &self.display.screen()
     }
 
     #[inline]

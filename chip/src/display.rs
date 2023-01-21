@@ -1,8 +1,9 @@
 pub const DISPLAY_WIDTH: usize = 64;
 pub const DISPLAY_HEIGHT: usize = 32;
+pub type Screen = [[bool; DISPLAY_WIDTH]; DISPLAY_HEIGHT];
 
 pub struct Display {
-    screen: [[bool; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
+    screen: Screen,
     must_draw: bool,
 }
 
@@ -10,12 +11,16 @@ impl Default for Display {
     fn default() -> Self {
         Display {
             screen: [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
-            must_draw: true,
+            must_draw: false,
         }
     }
 }
 
 impl Display {
+    pub fn screen(&self) -> &Screen {
+        &self.screen
+    }
+
     pub fn must_draw(&mut self) -> bool {
         if self.must_draw {
             self.must_draw = false;
