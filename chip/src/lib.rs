@@ -96,7 +96,6 @@ impl Chip {
             // 00EE - RET
             (0x0, 0x0, 0xE, 0xE) => {
                 self.memory.pc_register = self.stack.pop();
-                jump = true;
             }
             // 0nnn - SYS addr - Ignored
             (0x0, _, _, _) => (),
@@ -227,8 +226,8 @@ impl Chip {
             }
             // Fx65 - LD Vx, [I]
             (0xF, _, 0x6, 0x5) => {
-                let bytes = self.memory.get_bytes(instruction.x as u8);
-                self.v_registers[0..instruction.x].copy_from_slice(bytes);
+                let bytes = self.memory.get_bytes(1 + instruction.x as u8);
+                self.v_registers[0..=instruction.x].copy_from_slice(bytes);
             }
             _ => panic!("Unknown instruction"),
         };
