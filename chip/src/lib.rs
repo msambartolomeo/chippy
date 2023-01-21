@@ -89,19 +89,28 @@ impl Chip {
         let v_x = self.v_registers[instruction.x];
         let v_y = self.v_registers[instruction.y];
 
+        let mut jump = false;
+
         match nibbles {
             // 00E0 - CLS
             (0x0, 0x0, 0xE, 0x0) => self.display.clear(),
             // 00EE - RET
-            (0x0, 0x0, 0xE, 0xE) => self.memory.pc_register = self.stack.pop(),
+            (0x0, 0x0, 0xE, 0xE) => {
+                self.memory.pc_register = self.stack.pop();
+                jump = true;
+            }
             // 0nnn - SYS addr - Ignored
             (0x0, _, _, _) => (),
             // 1nnn - JP addr
-            (0x1, _, _, _) => self.memory.pc_register = instruction.nnn,
+            (0x1, _, _, _) => {
+                self.memory.pc_register = instruction.nnn;
+                jump = true;
+            }
             // 2nnn - CALL addr
             (0x2, _, _, _) => {
                 self.stack.push(self.memory.pc_register);
                 self.memory.pc_register = instruction.nnn;
+                jump = true;
             }
             // 3xkk - SE Vx, byte
             (0x3, _, _, _) => {
@@ -124,7 +133,7 @@ impl Chip {
             // 6xkk - LD Vx, byte
             (0x6, _, _, _) => self.v_registers[instruction.x] = instruction.kk,
             // 7xkk - ADD Vx, byte
-            (0x7, _, _, _) => self.v_registers[instruction.x] += instruction.kk,
+            (0x7, _, _, _) => self.v_registers[instruction.x] = v_x.wrapping_add(instruction.kk),
             // 8xy0 - LD Vx, Vy
             (0x8, _, _, 0x0) => self.v_registers[instruction.x] = v_y,
 
@@ -169,7 +178,8 @@ impl Chip {
             (0xA, _, _, _) => self.memory.i_register = instruction.nnn,
             // Bnnn - JP V0, addr
             (0xB, _, _, _) => {
-                self.memory.pc_register = instruction.nnn + self.v_registers[0x0] as u16
+                self.memory.pc_register = instruction.nnn + self.v_registers[0x0] as u16;
+                jump = true;
             }
             // Cxkk - RND Vx, byte
             (0xC, _, _, _) => {
@@ -224,7 +234,7 @@ impl Chip {
             _ => panic!("Unknown instruction"),
         };
 
-        if !self.keyboard.is_waiting() {
+        if !self.keyboard.is_waiting() && !jump {
             self.memory.increase_pc();
         }
     }
