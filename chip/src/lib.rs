@@ -69,7 +69,7 @@ impl Chip {
     }
 
     pub fn screen(&self) -> &Screen {
-        &self.display.screen()
+        self.display.screen()
     }
 
     #[inline]
