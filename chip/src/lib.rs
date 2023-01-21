@@ -2,7 +2,6 @@ mod display;
 mod hardware;
 mod memory;
 mod stack;
-mod timer;
 
 use display::Display;
 use hardware::{Keyboard, Timer};
