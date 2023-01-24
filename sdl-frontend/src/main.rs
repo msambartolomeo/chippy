@@ -8,13 +8,9 @@ use display::Display;
 use clap::Parser;
 use sdl2::event::Event;
 use sdl2::keyboard::Scancode;
+use std::time::{Duration, Instant};
 
-const TIMER_UPDATE_RATE: f64 = 60.0;
-const CPU_UPDATE_RATE: f64 = 500.0;
-
-const CPU_TICKS_TODO: f64 = CPU_UPDATE_RATE / TIMER_UPDATE_RATE;
-
-const TICK_FREQUENCY: f64 = (1.0 / CPU_UPDATE_RATE) * 1000.0;
+const CPU_TICK: Duration = Duration::from_micros(1_000_000 / 500);
 
 fn main() {
     let rom_path = Args::parse().path;
@@ -27,6 +23,8 @@ fn main() {
     let mut display = Display::init(&sdl).expect("Screen initialization error");
 
     let mut events = sdl.event_pump().expect("event pump creation error");
+
+    let mut last_cpu_tick = Instant::now();
 
     'main: loop {
         for event in events.poll_iter() {
@@ -57,6 +55,11 @@ fn main() {
         if actions.beep {
             // TODO: BEEP
         }
+
+        // TODO: Sleep?
+        while last_cpu_tick.elapsed() < CPU_TICK {}
+
+        last_cpu_tick = Instant::now();
     }
 
     println!();
