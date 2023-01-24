@@ -6,7 +6,7 @@ use sdl2::{pixels::Color, rect::Rect};
 
 use chip::{Screen, DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
-const SCALE: u32 = 15;
+const SCALE: u32 = 20;
 const BACKGROUND_COLOR: Color = Color::RGB(0, 0, 0);
 const FOREGROUND_COLOR: Color = Color::RGB(255, 255, 255);
 
