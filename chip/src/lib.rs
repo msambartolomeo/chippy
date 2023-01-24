@@ -211,7 +211,9 @@ impl Chip {
                 }
             }
             // Fx07 - LD Vx, DT
-            (0xF, _, 0x0, 0x7) => self.v_registers[instruction.x] = self.delay_timer.register,
+            (0xF, _, 0x0, 0x7) => {
+                self.v_registers[instruction.x] = self.delay_timer.get_remaining()
+            }
             // Fx0A - LD Vx, K
             (0xF, _, 0x0, 0xA) => {
                 if let Some(key) = self.keyboard.get_key() {
@@ -219,9 +221,9 @@ impl Chip {
                 }
             }
             // Fx15 - LD DT, Vx
-            (0xF, _, 0x1, 0x5) => self.delay_timer.register = v_x,
+            (0xF, _, 0x1, 0x5) => self.delay_timer.set_time(v_x),
             // Fx18 - LD ST, Vx
-            (0xF, _, 0x1, 0x8) => self.sound_timer.register = v_x,
+            (0xF, _, 0x1, 0x8) => self.sound_timer.set_time(v_x),
             // Fx1E - ADD I, Vx
             (0xF, _, 0x1, 0xE) => self.memory.i_register += v_x as u16,
             // Fx29 - LD F, Vx

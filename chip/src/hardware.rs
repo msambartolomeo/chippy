@@ -1,16 +1,40 @@
-#[derive(Default)]
+use std::time::{Duration, Instant};
+
+const TIMER_TICK: Duration = Duration::from_micros(1_000_000 / 60);
+
 pub struct Timer {
-    pub register: u8,
+    register: u8,
+    start_tick_time: Instant,
+}
+
+impl Default for Timer {
+    fn default() -> Self {
+        Self {
+            register: Default::default(),
+            start_tick_time: Instant::now(),
+        }
+    }
 }
 
 impl Timer {
     pub fn countdown(&mut self) -> bool {
-        if self.register > 0 {
+        if self.register > 0 && self.start_tick_time.elapsed() >= TIMER_TICK {
             self.register -= 1;
+            self.start_tick_time = Instant::now();
             return true;
         }
 
         false
+    }
+
+    pub fn set_time(&mut self, time: u8) {
+        self.register = time;
+
+        self.start_tick_time = Instant::now();
+    }
+
+    pub fn get_remaining(&self) -> u8 {
+        self.register
     }
 }
 
