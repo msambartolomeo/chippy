@@ -47,16 +47,20 @@ impl Display {
         let mut colision = false;
 
         for (height, byte) in sprite.iter().enumerate() {
-            for bit in 0..8 {
-                let old_pixel =
-                    &mut self.screen[(y + height) % DISPLAY_HEIGHT][(x + bit) % DISPLAY_WIDTH];
-                let new_pixel = byte & (1 << (7 - bit)) != 0;
+            let row = self.screen.get_mut(y + height);
+            if let Some(row) = row {
+                for bit in 0..8 {
+                    let old_pixel = row.get_mut(x + bit);
+                    if let Some(old_pixel) = old_pixel {
+                        let new_pixel = byte & (1 << (7 - bit)) != 0;
 
-                if !colision && *old_pixel && new_pixel {
-                    colision = true;
+                        if !colision && *old_pixel && new_pixel {
+                            colision = true;
+                        }
+
+                        *old_pixel = *old_pixel != new_pixel;
+                    }
                 }
-
-                *old_pixel = *old_pixel != new_pixel;
             }
         }
 
