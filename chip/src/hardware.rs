@@ -46,21 +46,21 @@ pub struct Keyboard {
 }
 
 pub enum Key {
+    Key0,
     Key1,
     Key2,
     Key3,
-    KeyC,
     Key4,
     Key5,
     Key6,
-    KeyD,
     Key7,
     Key8,
     Key9,
-    KeyE,
     KeyA,
-    Key0,
     KeyB,
+    KeyC,
+    KeyD,
+    KeyE,
     KeyF,
 }
 
