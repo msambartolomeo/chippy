@@ -1,4 +1,5 @@
 mod args;
+mod beep;
 mod display;
 
 use args::Args;
@@ -9,6 +10,8 @@ use clap::Parser;
 use sdl2::event::Event;
 use sdl2::keyboard::Scancode;
 use std::time::{Duration, Instant};
+
+use crate::beep::Beep;
 
 const CPU_TICK: Duration = Duration::from_micros(1_000_000 / 500);
 
@@ -21,6 +24,8 @@ fn main() {
     let sdl = sdl2::init().expect("Sdl creation error");
 
     let mut display = Display::init(&sdl).expect("Screen initialization error");
+
+    let mut beep = Beep::init(&sdl).expect("beep initialization error");
 
     let mut events = sdl.event_pump().expect("event pump creation error");
 
@@ -53,7 +58,7 @@ fn main() {
         }
 
         if actions.beep {
-            // TODO: BEEP
+            beep.beep();
         }
 
         // TODO: Sleep?
