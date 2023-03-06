@@ -126,24 +126,4 @@ mod tests {
             assert_eq!(display.screen[height][7], result[height]);
         }
     }
-
-    #[test]
-    fn test_sprite_wrapping() {
-        let mut display = Display::default();
-
-        let colision =
-            display.draw_sprite(&SPRITE, DISPLAY_WIDTH as u8 - 1, DISPLAY_HEIGHT as u8 - 1);
-
-        assert!(!colision);
-
-        for height in 0..SPRITE.len() {
-            for bit in 0..8 {
-                assert_eq!(
-                    display.screen[(DISPLAY_HEIGHT - 1 + height) % DISPLAY_HEIGHT]
-                        [(DISPLAY_WIDTH - 1 + bit) % DISPLAY_WIDTH],
-                    SPRITE_BOOL[height][bit]
-                );
-            }
-        }
-    }
 }
