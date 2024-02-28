@@ -33,7 +33,7 @@ impl Timer {
         self.start_tick_time = Instant::now();
     }
 
-    pub fn get_remaining(&self) -> u8 {
+    pub const fn get_remaining(&self) -> u8 {
         self.register
     }
 }
@@ -78,7 +78,7 @@ impl Keyboard {
         self.keys[key as usize] = false;
     }
 
-    pub fn is_key_pressed(&self, key: u8) -> bool {
+    pub const fn is_key_pressed(&self, key: u8) -> bool {
         self.keys[key as usize]
     }
 
@@ -94,7 +94,7 @@ impl Keyboard {
         }
     }
 
-    pub fn is_waiting(&self) -> bool {
+    pub const fn is_waiting(&self) -> bool {
         self.waiting_input
     }
 }
@@ -112,30 +112,34 @@ mod tests {
         let key = keyboard.get_key();
 
         assert_eq!(key, None);
-        assert_eq!(keyboard.waiting_input, true);
+        assert!(keyboard.waiting_input);
     }
 
     #[test]
     fn test_get_key_not_pressed() {
-        let mut keyboard = Keyboard::default();
-        keyboard.waiting_input = true;
+        let mut keyboard = Keyboard {
+            waiting_input: true,
+            ..Default::default()
+        };
 
         let key = keyboard.get_key();
 
         assert_eq!(key, None);
-        assert_eq!(keyboard.waiting_input, true);
+        assert!(keyboard.waiting_input);
     }
 
     #[test]
     fn test_get_key_pressed() {
-        let mut keyboard = Keyboard::default();
-        keyboard.waiting_input = true;
-        keyboard.last_pressed = Some(KEY);
+        let mut keyboard = Keyboard {
+            last_pressed: Some(KEY),
+            waiting_input: true,
+            ..Default::default()
+        };
 
         let key = keyboard.get_key();
 
         assert_eq!(key, Some(KEY));
-        assert_eq!(keyboard.waiting_input, false);
+        assert!(!keyboard.waiting_input);
         assert_eq!(keyboard.last_pressed, None);
     }
 }

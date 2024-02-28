@@ -9,7 +9,7 @@ pub struct Display {
 
 impl Default for Display {
     fn default() -> Self {
-        Display {
+        Self {
             screen: [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
             must_draw: false,
         }
@@ -17,7 +17,7 @@ impl Default for Display {
 }
 
 impl Display {
-    pub fn screen(&self) -> &Screen {
+    pub const fn screen(&self) -> &Screen {
         &self.screen
     }
 
@@ -37,9 +37,7 @@ impl Display {
 
     // NOTE: Returns true on colision
     pub fn draw_sprite(&mut self, sprite: &[u8], x: u8, y: u8) -> bool {
-        if sprite.len() > 15 {
-            panic!("Unsupported sprite");
-        }
+        assert!(sprite.len() <= 15, "Unsupported sprite");
 
         let x = x as usize;
         let y = y as usize;
@@ -83,10 +81,10 @@ mod tests {
 
         display.clear();
 
-        assert_eq!(display.screen, [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT])
+        assert_eq!(display.screen, [[false; DISPLAY_WIDTH]; DISPLAY_HEIGHT]);
     }
 
-    const SPRITE: [u8; 3] = [0b00111111, 0b11111111, 0b11000010];
+    const SPRITE: [u8; 3] = [0b0011_1111, 0b1111_1111, 0b1100_0010];
     const SPRITE_BOOL: [[bool; 8]; 3] = [
         [false, false, true, true, true, true, true, true],
         [true, true, true, true, true, true, true, true],
@@ -101,13 +99,9 @@ mod tests {
 
         assert!(!colision);
 
-        for height in 0..SPRITE.len() {
-            for bit in 0..8 {
-                assert_eq!(
-                    display.screen[height][bit], SPRITE_BOOL[height][bit],
-                    "{}, {}",
-                    bit, height
-                );
+        for (height, sprite_result) in SPRITE_BOOL.into_iter().enumerate() {
+            for (bit, result) in sprite_result.into_iter().enumerate() {
+                assert_eq!(display.screen[height][bit], result, "{bit}, {height}");
             }
         }
     }
@@ -121,9 +115,9 @@ mod tests {
 
         assert!(colision);
 
-        let result = [true, false, true];
-        for height in 0..SPRITE.len() {
-            assert_eq!(display.screen[height][7], result[height]);
+        let results = [true, false, true];
+        for (height, result) in results.into_iter().enumerate() {
+            assert_eq!(display.screen[height][7], result);
         }
     }
 }

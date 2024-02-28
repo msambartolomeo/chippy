@@ -8,17 +8,13 @@ pub struct Stack {
 
 impl Stack {
     pub fn push(&mut self, value: u16) {
-        if self.stack_pointer >= STACK_SIZE {
-            panic!("Stack is full");
-        }
+        assert!(self.stack_pointer < STACK_SIZE, "Stack is full");
         self.array[self.stack_pointer] = value;
         self.stack_pointer += 1;
     }
 
     pub fn pop(&mut self) -> u16 {
-        if self.stack_pointer == 0 {
-            panic!("Stack is empty");
-        }
+        assert!(self.stack_pointer != 0, "Stack is empty");
 
         self.stack_pointer -= 1;
 
@@ -48,7 +44,7 @@ mod tests {
     fn test_stack_full() {
         let mut stack = Stack::default();
 
-        for _ in 0..STACK_SIZE + 1 {
+        for _ in 0..=STACK_SIZE {
             stack.push(1);
         }
     }

@@ -2,3 +2,12 @@
 resolver = "2"
 
 members = ["chip", "sdl-frontend"]
+
+[workspace.lints.clippy]
+pedantic = "deny"
+nursery = "deny"
+unwrap_used = "deny"
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+missing_panics_doc = "allow"
+missing_errors_doc = "allow"

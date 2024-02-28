@@ -15,7 +15,7 @@ pub struct Display {
 }
 
 impl Display {
-    pub fn init(sdl: &Sdl) -> Result<Display, Box<dyn Error>> {
+    pub fn init(sdl: &Sdl) -> Result<Self, Box<dyn Error>> {
         let video_subsystem = sdl.video()?;
         let window = video_subsystem
             .window(
@@ -32,7 +32,7 @@ impl Display {
 
         canvas.present();
 
-        Ok(Display { canvas })
+        Ok(Self { canvas })
     }
 
     pub fn draw(&mut self, screen: &Screen) -> Result<(), String> {

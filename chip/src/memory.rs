@@ -27,8 +27,8 @@ pub struct Memory {
 }
 
 impl Memory {
-    pub fn new(start: u16) -> Memory {
-        let mut memory = Memory {
+    pub fn new(start: u16) -> Self {
+        let mut memory = Self {
             array: [0; MAX_MEMORY],
             i_register: 0,
             pc_register: start,
@@ -39,14 +39,15 @@ impl Memory {
         memory
     }
 
-    pub fn load_rom(&mut self, rom: Vec<u8>) {
-        if rom.len() > MAX_MEMORY - self.pc_register as usize {
-            panic!("Rom too big");
-        }
+    pub fn load_rom(&mut self, rom: &[u8]) {
+        assert!(
+            rom.len() <= MAX_MEMORY - self.pc_register as usize,
+            "Rom too big"
+        );
 
         let i = self.pc_register as usize;
 
-        self.array[i..i + rom.len()].copy_from_slice(&rom);
+        self.array[i..i + rom.len()].copy_from_slice(rom);
     }
 
     pub fn get_bytes(&self, count: u8) -> &[u8] {
@@ -57,8 +58,8 @@ impl Memory {
 
     pub fn get_current_instruction(&self) -> Instruction {
         let address = self.pc_register as usize;
-        let first = self.array[address] as u16;
-        let second = self.array[address + 1] as u16;
+        let first = u16::from(self.array[address]);
+        let second = u16::from(self.array[address + 1]);
 
         let raw_instruction = first << 8 | second;
 
@@ -70,11 +71,9 @@ impl Memory {
     }
 
     pub fn load_default_sprite(&mut self, x: u8) {
-        if x > 0xF {
-            panic!("Invalid default sprite");
-        }
+        assert!(x <= 0xF, "Invalid default sprite");
 
-        self.i_register = x as u16 * DEFAULT_SPRITE_SIZE as u16;
+        self.i_register = u16::from(x) * DEFAULT_SPRITE_SIZE as u16;
     }
 
     pub fn load_decimal_to_memory(&mut self, num: u8) {
@@ -87,7 +86,7 @@ impl Memory {
 
     pub fn load_bytes_to_memory(&mut self, bytes: &[u8]) {
         let index = self.i_register as usize;
-        self.array[index..index + bytes.len()].copy_from_slice(bytes)
+        self.array[index..index + bytes.len()].copy_from_slice(bytes);
     }
 }
 
@@ -97,6 +96,7 @@ impl Memory {
 // x - A 4-bit value, the lower 4 bits of the high byte of the instruction
 // y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 // kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+#[derive(Clone, Copy)]
 pub enum BitVariables {
     S,
     Nnn,
@@ -107,7 +107,7 @@ pub enum BitVariables {
 }
 
 // Returns the part of the u16 represented by the variable
-fn get_variable(value: u16, variable: BitVariables) -> u16 {
+const fn get_variable(value: u16, variable: BitVariables) -> u16 {
     match variable {
         BitVariables::S => value >> 12,
         BitVariables::Nnn => value & 0x0FFF,
@@ -130,7 +130,7 @@ pub struct Instruction {
 
 impl From<u16> for Instruction {
     fn from(value: u16) -> Self {
-        Instruction {
+        Self {
             s: get_variable(value, BitVariables::S) as u8,
             x: get_variable(value, BitVariables::X) as usize,
             y: get_variable(value, BitVariables::Y) as usize,
@@ -142,7 +142,7 @@ impl From<u16> for Instruction {
 }
 
 impl Instruction {
-    pub fn get_nibbles(&self) -> (u8, u8, u8, u8) {
+    pub const fn get_nibbles(&self) -> (u8, u8, u8, u8) {
         (self.s, self.x as u8, self.y as u8, self.n)
     }
 }
@@ -188,7 +188,7 @@ mod tests {
         assert_eq!(
             memory.array[i..i + DEFAULT_SPRITE_SIZE],
             DEFAULT_SPRITES[75..80]
-        )
+        );
     }
 
     #[test]
@@ -213,9 +213,10 @@ mod tests {
 
     #[test]
     fn test_load_bytes() {
+        const DATA: [u8; 3] = [1, 2, 3];
+
         let mut memory = Memory::new(DEFAULT_START);
         memory.i_register = DEFAULT_START;
-        const DATA: [u8; 3] = [1, 2, 3];
 
         memory.load_bytes_to_memory(&DATA);
 

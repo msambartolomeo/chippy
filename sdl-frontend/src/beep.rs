@@ -62,7 +62,7 @@ impl Beep {
             }
         })?;
 
-        Ok(Beep { audio_device })
+        Ok(Self { audio_device })
     }
 
     pub fn beep(&mut self) {

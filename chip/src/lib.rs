@@ -34,13 +34,14 @@ pub struct Actions {
 
 impl Default for Chip {
     fn default() -> Self {
-        Chip::new(DEFAULT_ROM_START)
+        Self::new(DEFAULT_ROM_START)
     }
 }
 
 impl Chip {
-    pub fn new(rom_start: u16) -> Chip {
-        Chip {
+    #[must_use]
+    pub fn new(rom_start: u16) -> Self {
+        Self {
             v_registers: [0; REGISTERS_COUNT],
             memory: Memory::new(rom_start),
             delay_timer: Timer::default(),
@@ -64,31 +65,30 @@ impl Chip {
     pub fn load_rom(&mut self, path: String) -> Result<(), std::io::Error> {
         let rom = std::fs::read(path)?;
 
-        self.memory.load_rom(rom);
+        self.memory.load_rom(&rom);
 
         Ok(())
     }
 
-    pub fn screen(&self) -> &Screen {
+    #[must_use]
+    pub const fn screen(&self) -> &Screen {
         self.display.screen()
     }
 
     pub fn press_key(&mut self, key: Key) {
-        self.keyboard.press_key(key)
+        self.keyboard.press_key(key);
     }
 
     pub fn unpress_key(&mut self, key: Key) {
-        self.keyboard.unpress_key(key)
+        self.keyboard.unpress_key(key);
     }
 
     #[inline]
     fn set_flag(&mut self, condition: bool) {
-        self.v_registers[0xF] = match condition {
-            true => 1,
-            false => 0,
-        };
+        self.v_registers[0xF] = u8::from(condition);
     }
 
+    #[allow(clippy::too_many_lines)]
     fn process_instruction(&mut self) {
         let instruction = self.memory.get_current_instruction();
 
@@ -152,7 +152,7 @@ impl Chip {
             (0x8, _, _, 0x3) => self.v_registers[instruction.x] ^= v_y,
             // 8xy4 - ADD Vx, Vy
             (0x8, _, _, 0x4) => {
-                self.set_flag(v_x as u16 + v_y as u16 > 255);
+                self.set_flag(u16::from(v_x) + u16::from(v_y) > 255);
                 self.v_registers[instruction.x] = v_x.wrapping_add(v_y);
             }
             // 8xy5 - SUB Vx, Vy
@@ -185,12 +185,12 @@ impl Chip {
             (0xA, _, _, _) => self.memory.i_register = instruction.nnn,
             // Bnnn - JP V0, addr
             (0xB, _, _, _) => {
-                self.memory.pc_register = instruction.nnn + self.v_registers[0x0] as u16;
+                self.memory.pc_register = instruction.nnn + u16::from(self.v_registers[0x0]);
                 jump = true;
             }
             // Cxkk - RND Vx, byte
             (0xC, _, _, _) => {
-                self.v_registers[instruction.x] = thread_rng().gen::<u8>() & instruction.kk
+                self.v_registers[instruction.x] = thread_rng().gen::<u8>() & instruction.kk;
             }
             // Dxyn - DRW Vx, Vy, nibble
             (0xD, _, _, _) => {
@@ -212,7 +212,7 @@ impl Chip {
             }
             // Fx07 - LD Vx, DT
             (0xF, _, 0x0, 0x7) => {
-                self.v_registers[instruction.x] = self.delay_timer.get_remaining()
+                self.v_registers[instruction.x] = self.delay_timer.get_remaining();
             }
             // Fx0A - LD Vx, K
             (0xF, _, 0x0, 0xA) => {
@@ -225,7 +225,7 @@ impl Chip {
             // Fx18 - LD ST, Vx
             (0xF, _, 0x1, 0x8) => self.sound_timer.set_time(v_x),
             // Fx1E - ADD I, Vx
-            (0xF, _, 0x1, 0xE) => self.memory.i_register += v_x as u16,
+            (0xF, _, 0x1, 0xE) => self.memory.i_register += u16::from(v_x),
             // Fx29 - LD F, Vx
             (0xF, _, 0x2, 0x9) => self.memory.load_default_sprite(v_x),
             // Fx33 - LD B, Vx

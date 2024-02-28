@@ -70,7 +70,7 @@ fn main() {
     println!();
 }
 
-fn get_key(scancode: Option<Scancode>) -> Option<Key> {
+const fn get_key(scancode: Option<Scancode>) -> Option<Key> {
     match scancode {
         Some(Scancode::Num1) => Some(Key::Key1),
         Some(Scancode::Num2) => Some(Key::Key2),
